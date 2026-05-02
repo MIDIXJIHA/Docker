@@ -1,25 +1,27 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-bullseye
 
-# Install dependencies for OCI8
-RUN apt-get update && apt-get install -y \
-    libaio1 \
-    libaio-dev \
-    wget \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Download and install Oracle Instant Client
-RUN mkdir -p /opt/oracle && cd /opt/oracle && \
-    wget https://download.oracle.com/otn_software/linux/instantclient/219/instantclient-basic-linux.x64-21.9.0.0.0dbru.zip && \
-    unzip instantclient-basic-linux.x64-21.9.0.0.0dbru.zip && \
-    rm instantclient-basic-linux.x64-21.9.0.0.0dbru.zip
+# Install PDO extensions (MySQL for compatibility)
+RUN docker-php-ext-install pdo pdo_mysql
 
-# Set environment variables for Oracle
-ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_21_9:$LD_LIBRARY_PATH
-ENV ORACLE_HOME=/opt/oracle/instantclient_21_9
+# Note: For full OCI8 support with Oracle Instant Client:
+# 1. Download Oracle Instant Client for your platform
+# 2. Place in docker/instantclient_21_9/ folder
+# 3. Uncomment OCI8 installation below
+# 4. Rebuild: docker compose build --no-cache
 
-# Install PHP OCI8 extension
-RUN docker-php-ext-configure oci8 --with-oci8=instantclient,/opt/oracle/instantclient_21_9 && \
-    docker-php-ext-install -j$(nproc) oci8 pdo pdo_oci
+# Optional: Uncomment to add OCI8 support
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#     libaio1 libaio-dev build-essential && \
+#     rm -rf /var/lib/apt/lists/* && \
+#     docker-php-ext-configure oci8 --with-oci8=instantclient,/opt/oracle/instantclient_21_9 && \
+#     docker-php-ext-install oci8
 
 WORKDIR /var/www/html
