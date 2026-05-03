@@ -59,6 +59,19 @@ RUN printf "instantclient,/opt/oracle/instantclient\n" | \
     docker-php-ext-enable oci8
 
 # -------------------------------------------------
+# Install Composer
+# -------------------------------------------------
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# -------------------------------------------------
 # Final working directory
 # -------------------------------------------------
 WORKDIR /var/www/html
+
+# Copy composer files if they exist
+COPY composer.json* ./
+RUN if [ -f "composer.json" ]; then composer install --no-dev --optimize-autoloader || true; fi
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
