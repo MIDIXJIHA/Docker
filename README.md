@@ -1,28 +1,105 @@
-# Quick Start Guide
+# Database Containers Project
 
-## Using the New Database Component
+A comprehensive multi-database development environment with Docker containers for MySQL, PostgreSQL, and Oracle databases. Includes a reusable PHP database abstraction library for simplified database operations.
 
-### 1. Install
-```bash
-cd containers/app-mysql  # or app-postgres, app-oracle
-composer install
-composer dump-autoload
+## 📁 Project Structure
+
+```
+containers/
+├── README.md                    # This file
+├── .gitignore
+├── app-mysql/                   # MySQL + PHP + Nginx container
+│   ├── docker-compose.yml
+│   ├── docker/
+│   │   ├── nginx/default.conf
+│   │   └── php/Dockerfile
+│   ├── src/
+│   │   ├── app/index.php
+│   │   └── public/
+│   │       ├── index.php
+│   │       └── test-connection.php
+│   ├── composer.json
+│   ├── .env
+│   └── README.md
+├── app-postgres/                # PostgreSQL + PHP + Nginx container
+│   ├── docker-compose.yml
+│   ├── docker/
+│   ├── src/
+│   ├── composer.json
+│   ├── .env
+│   └── README.md
+└── app-oracle/                  # Oracle + PHP + Nginx container
+    ├── docker-compose.yml
+    ├── docker/
+    ├── src/
+    ├── vendor/
+    │   └── schwi/database/      # Local database component
+    ├── composer.json
+    ├── .env
+    └── README.md
 ```
 
-### 2. Configure Environment
-Each container already has `.env` configured for its database type:
-- **app-mysql**: `DB_TYPE=mysql`
-- **app-postgres**: `DB_TYPE=postgres`
-- **app-oracle**: `DB_TYPE=oracle`
+## 🚀 Quick Start
 
-### 3. Test Connection
+### Choose Your Database
+
+Start any of the three containers:
+
 ```bash
-docker-compose exec php php test-connection.php
+# MySQL (port 8080)
+cd app-mysql
+docker-compose up -d
+
+# PostgreSQL (port 8081)
+cd app-postgres
+docker-compose up -d
+
+# Oracle (port 8080)
+cd app-oracle
+docker-compose up -d
 ```
 
-### 4. Use in Code
+### Access the Application
 
-**Simple Queries**:
+- **MySQL**: http://localhost:8080
+- **PostgreSQL**: http://localhost:8081
+- **Oracle**: http://localhost:8080
+
+### Stop Containers
+
+```bash
+docker-compose down
+```
+
+## 📋 Container Details
+
+### MySQL Container
+- **Port**: 8080
+- **Database**: MySQL 8.0
+- **PHP**: 8.2-FPM with PDO MySQL
+- **Web Server**: Nginx Alpine
+- **Files**: See [app-mysql/README.md](app-mysql/README.md)
+
+### PostgreSQL Container  
+- **Port**: 8081
+- **Database**: PostgreSQL 15
+- **PHP**: 8.1-FPM with PDO PostgreSQL
+- **Web Server**: Nginx Alpine
+- **Files**: See [app-postgres/README.md](app-postgres/README.md)
+
+### Oracle Container
+- **Port**: 8080
+- **Database**: Oracle Database Free
+- **PHP**: 8.2-FPM (OCI8 requires manual installation)
+- **Web Server**: Nginx Alpine
+- **Files**: See [app-oracle/README.md](app-oracle/README.md)
+
+## 💾 Database Component Library
+
+Each container includes the Schwi Database component for simplified database operations.
+
+### Basic Usage
+
 ```php
 <?php
 use Schwi\Database\DatabaseConnection;
@@ -37,7 +114,8 @@ $user = DatabaseConnection::getRow("SELECT * FROM users WHERE id = ?", [1]);
 $users = DatabaseConnection::getAll("SELECT * FROM users");
 ```
 
-**Insert/Update/Delete**:
+### Insert/Update/Delete
+
 ```php
 <?php
 use Schwi\Database\DatabaseConnection;
@@ -61,7 +139,8 @@ DatabaseConnection::execute(
 );
 ```
 
-**Transactions**:
+### Transactions
+
 ```php
 <?php
 use Schwi\Database\DatabaseConnection;
@@ -87,7 +166,8 @@ try {
 }
 ```
 
-**Repository Pattern**:
+### Repository Pattern Example
+
 ```php
 <?php
 use Schwi\Database\DatabaseConnection;
