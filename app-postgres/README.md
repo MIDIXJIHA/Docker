@@ -11,21 +11,31 @@ This is a PostgreSQL container setup with PHP and Nginx for testing and developm
 ## Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 
 ### Running the Container
 
 1. Navigate to this directory:
+
 ```bash
 cd containers/app-postgres
 ```
 
+2. Copy the .env.example file to .env:
+
+```bash
+cp .env.example .env
+```
+
 2. Start the container:
+
 ```bash
 docker-compose up -d
 ```
 
 3. Access the application:
+
 - Web Interface: http://localhost:8081
 - PostgreSQL Connection: `localhost:5432`
 
@@ -67,6 +77,7 @@ The `.env` file contains the following variables:
 ## Testing
 
 The `src/index.php` file contains a connection test that:
+
 1. Connects to the PostgreSQL database
 2. Displays connection details
 3. Retrieves and shows the PostgreSQL version
