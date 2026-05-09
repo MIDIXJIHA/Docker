@@ -106,13 +106,15 @@ app.get('/api/realtime/operators', (req, res) => {
 app.get('/api/realtime/vehicle-positions/:operator', async (req, res) => {
   try {
     if (!gtfsRealtimeParser) {
-      return res.status(503).json({ error: 'Service not initialized' });
+      return res.status(503).json({ success: false, error: 'GTFS realtime service not initialized' });
     }
-    const buffer = await gtfsRealtimeParser.getVehiclePositions(req.params.operator);
+    const { operator } = req.params;
+    const buffer = await gtfsRealtimeParser.getVehiclePositions(operator);
     const parsed = gtfsRealtimeParser.parseProtobuf(buffer);
-    res.json({ success: true, data: parsed });
+    return res.json({ success: true, operator, timestamp: new Date().toISOString(), data: parsed });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 
