@@ -46,6 +46,46 @@ class RapidKLAPI {
   }
 
   /**
+   * Get weather forecast
+   */
+  static async getWeatherForecast(params = {}) {
+    const response = await axios.get(`${API_URL}/weather/forecast`, { params });
+    return response.data.data;
+  }
+
+  /**
+   * Get weather warnings
+   */
+  static async getWeatherWarnings(params = {}) {
+    const response = await axios.get(`${API_URL}/weather/warnings`, { params });
+    return response.data.data;
+  }
+
+  /**
+   * Get earthquake warnings
+   */
+  static async getEarthquakeWarnings(params = {}) {
+    const response = await axios.get(`${API_URL}/weather/earthquake-warnings`, { params });
+    return response.data.data;
+  }
+
+  /**
+   * Get realtime operators
+   */
+  static async getRealtimeOperators() {
+    const response = await axios.get(`${API_URL}/realtime/operators`);
+    return response.data.data;
+  }
+
+  /**
+   * Get vehicle positions
+   */
+  static async getVehiclePositions(operator) {
+    const response = await axios.get(`${API_URL}/realtime/vehicle-positions/${operator}`);
+    return response.data.data;
+  }
+
+  /**
    * Get all routes (RapidKL legacy)
    */
   static async getRoutes() {

@@ -2,50 +2,172 @@ import React, { useState } from 'react';
 import OperatorSelector from '../components/OperatorSelector';
 import GTFSRouteList from '../components/GTFSRouteList';
 import GTFSSchedule from '../components/GTFSSchedule';
+import WeatherWidget from '../components/WeatherWidget';
+import RealtimeTracker from '../components/RealtimeTracker';
 import './Dashboard.css';
 
 function Dashboard() {
   const [selectedOperator, setSelectedOperator] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [activeTab, setActiveTab] = useState('routes');
 
   return (
     <div className="dashboard">
+      {/* Header */}
       <header className="dashboard-header">
         <div className="header-content">
-          <h1>🚊 Malaysia Transit Tracker</h1>
-          <p>GTFS-powered real-time and scheduled transit information</p>
+          <div className="header-title">
+            <h1>🚊 Malaysia Transit Hub</h1>
+            <p>Comprehensive public transportation tracking and information</p>
+          </div>
+          <div className="header-stats">
+            <div className="stat-item">
+              <span className="stat-icon">🗺️</span>
+              <div>
+                <span className="stat-label">GTFS Agencies</span>
+                <span className="stat-value">15+</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">📍</span>
+              <div>
+                <span className="stat-label">Data Portal</span>
+                <span className="stat-value">data.gov.my</span>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="dashboard-main">
-        <div className="dashboard-grid">
-          <div className="sidebar">
-            <OperatorSelector onSelectOperator={setSelectedOperator} />
-            {selectedOperator && <GTFSRouteList operator={selectedOperator} onSelectRoute={setSelectedRoute} />}
-          </div>
+        <div className="dashboard-container">
+          {/* Left Sidebar */}
+          <aside className="sidebar">
+            <div className="sidebar-section">
+              <h2 className="sidebar-title">Transit Operator</h2>
+              <OperatorSelector onSelectOperator={setSelectedOperator} />
+            </div>
 
-          <div className="content">
-            <div className="route-details">
-              {selectedRoute ? (
-                <div>
-                  <h2>{selectedRoute.code}: {selectedRoute.name}</h2>
+            {/* Routes List */}
+            {selectedOperator && (
+              <div className="sidebar-section routes-section">
+                <h2 className="sidebar-title">Routes</h2>
+                <GTFSRouteList 
+                  operator={selectedOperator} 
+                  onSelectRoute={setSelectedRoute} 
+                />
+              </div>
+            )}
+          </aside>
+
+          {/* Main Content Area */}
+          <section className="main-content">
+            {/* Tabs */}
+            <div className="content-tabs">
+              <button
+                className={`tab-btn ${activeTab === 'routes' ? 'active' : ''}`}
+                onClick={() => setActiveTab('routes')}
+              >
+                📋 Schedule
+              </button>
+              <button
+                className={`tab-btn ${activeTab === 'realtime' ? 'active' : ''}`}
+                onClick={() => setActiveTab('realtime')}
+              >
+                🚗 Realtime
+              </button>
+              <button
+                className={`tab-btn ${activeTab === 'weather' ? 'active' : ''}`}
+                onClick={() => setActiveTab('weather')}
+              >
+                🌦️ Weather
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="tab-content">
+              {/* Schedule Tab */}
+              {activeTab === 'routes' && (
+                <div className="tab-panel">
+                  {selectedRoute && selectedOperator ? (
+                    <GTFSSchedule 
+                      operator={selectedOperator} 
+                      route={selectedRoute} 
+                    />
+                  ) : (
+                    <div className="empty-state">
+                      <div className="empty-icon">📍</div>
+                      <h3>Select a Route</h3>
+                      <p>Choose a transit operator and route to view schedules and stop information.</p>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="no-selection">
-                  <p>Select an operator and route to view schedule</p>
+              )}
+
+              {/* Realtime Tab */}
+              {activeTab === 'realtime' && (
+                <div className="tab-panel">
+                  {selectedOperator ? (
+                    <RealtimeTracker operator={selectedOperator} />
+                  ) : (
+                    <div className="empty-state">
+                      <div className="empty-icon">🚗</div>
+                      <h3>Select an Operator</h3>
+                      <p>Choose a transit operator to view live vehicle positions and tracking data.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Weather Tab */}
+              {activeTab === 'weather' && (
+                <div className="tab-panel weather-panel">
+                  <WeatherWidget />
                 </div>
               )}
             </div>
+          </section>
+        </div>
 
-            {selectedRoute && selectedOperator && (
-              <GTFSSchedule operator={selectedOperator} route={selectedRoute} />
-            )}
+        {/* Footer Info */}
+        <div className="dashboard-info">
+          <div className="info-card">
+            <h4>📚 Data Sources</h4>
+            <ul>
+              <li>GTFS Static: Routes, stops, and schedules</li>
+              <li>GTFS Realtime: Vehicle positions (30s updates)</li>
+              <li>Weather API: Forecasts and warnings</li>
+              <li>Source: Malaysia Open Data Portal</li>
+            </ul>
+          </div>
+          <div className="info-card">
+            <h4>🏢 Transit Operators</h4>
+            <ul>
+              <li>KTMB (Trains nationwide)</li>
+              <li>Prasarana (LRT, MRT, Monorail, Buses)</li>
+              <li>BAS.MY (Stage buses, multiple states)</li>
+              <li>Service data updated regularly</li>
+            </ul>
+          </div>
+          <div className="info-card">
+            <h4>⚡ Features</h4>
+            <ul>
+              <li>Real-time vehicle tracking</li>
+              <li>Route planning and schedules</li>
+              <li>Stop information and arrivals</li>
+              <li>Weather and alerts integration</li>
+            </ul>
           </div>
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="dashboard-footer">
-        <p>Data from Malaysia Open Data Portal (data.gov.my)</p>
+        <p>
+          🔗 Data from <strong>Malaysia Open Data Portal</strong> (developer.data.gov.my) •
+          Last updated: {new Date().toLocaleTimeString()}
+        </p>
       </footer>
     </div>
   );
