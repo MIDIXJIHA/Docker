@@ -1,0 +1,25 @@
+{
+  "name": "rapidkl-backend",
+  "version": "1.0.0",
+  "description": "RapidKL Tracking Backend API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["rapidkl", "backend", "api"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.0",
+    "redis": "^4.6.0",
+    "unzipper": "^0.10.14",
+    "rapidkl-component": "git+https://github.com/MIDIXJIHA/rapidkl-component.git#v1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

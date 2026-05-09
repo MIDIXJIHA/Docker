@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: rapidkl-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - RAPIDKL_API_BASE_URL=https://developer.data.gov.my
+      - RAPIDKL_API_KEY=${RAPIDKL_API_KEY}
+      - CACHE_ENABLED=true
+      - CACHE_TTL=300
+    volumes:
+      - ./backend/src:/app/src
+    networks:
+      - rapidkl-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rapidkl-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5001/api
+      - REACT_APP_MAPBOX_TOKEN=${MAPBOX_TOKEN}
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - rapidkl-network
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: rapidkl-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - rapidkl-network
+    depends_on:
+      - frontend
+      - backend
+
+networks:
+  rapidkl-network:
+    driver: bridge

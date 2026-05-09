@@ -1,0 +1,44 @@
+.operator-selector {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.operator-selector label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.operator-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.operator-select:focus {
+  outline: none;
+  border-color: #1976d2;
+}
+
+.operator-selector.loading,
+.operator-selector.error {
+  text-align: center;
+  padding: 20px 15px;
+  font-size: 12px;
+}
+
+.operator-selector.error {
+  background: #ffebee;
+  color: #d32f2f;
+}
