@@ -1,0 +1,404 @@
+.gtfs-route-map {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Loading state */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 400px;
+  gap: 1rem;
+  color: #999;
+  flex: 1;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Controls */
+.route-map-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e3e8;
+  flex-shrink: 0;
+}
+
+.route-search {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #e0e3e8;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.route-search:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.route-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #667eea;
+  padding: 0.5rem 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Error message */
+.route-error {
+  padding: 1rem;
+  background: #FFE8E8;
+  border: 1px solid #FFB3B3;
+  color: #C33;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin: 1rem;
+  flex-shrink: 0;
+}
+
+/* Map + Sidebar row */
+.route-map-body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  position: relative;
+}
+
+/* Map container */
+.route-map-container {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  /* Leaflet needs a deterministic height at mount time to initialise panes.
+     Flex layout may report clientHeight=0 during the first paint, causing
+     el._leaflet_pos errors when fitBounds triggers zoom transitions. Using
+     vh units guarantees Leaflet can always measure its container. */
+  height: 75vh;
+}
+
+/* Stop markers */
+.stop-marker {
+  width: 28px;
+  height: 28px;
+}
+
+.stop-marker-inner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.stop-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Stop popup */
+.stop-popup {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.stop-popup strong {
+  display: block;
+  color: #667eea;
+  margin-bottom: 0.25rem;
+}
+
+.stop-popup br {
+  margin: 0.25rem 0;
+}
+
+/* Schedule button inside popup */
+.schedule-btn {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+  text-align: center;
+}
+
+.schedule-btn:hover {
+  background: #5a6fd6;
+}
+
+/* Schedule panel in sidebar */
+.schedule-panel {
+  flex-shrink: 0;
+  border-top: 2px solid #667eea;
+  background: #f8f9fa;
+  max-height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #667eea;
+  background: white;
+  border-bottom: 1px solid #e0e3e8;
+}
+
+.schedule-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.schedule-close-btn:hover {
+  color: #333;
+}
+
+.schedule-loading,
+.schedule-empty {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.schedule-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.schedule-time-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.35rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e0e3e8;
+  font-size: 0.85rem;
+}
+
+.schedule-time {
+  font-weight: 600;
+  color: #333;
+}
+
+.schedule-trip {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Route list sidebar */
+.route-list-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: white;
+  border-left: 1px solid #e0e3e8;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+  /* Match map container height so the inner scroll container has a
+     bounded parent. Without this, the scroll area expands to fit all
+     items instead of clipping to the visible area. */
+  height: 75vh;
+}
+
+.route-list-sidebar h4 {
+  margin: 0;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #667eea;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e3e8;
+  flex-shrink: 0;
+}
+
+.route-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.route-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.route-item:hover {
+  background: #f8f9fa;
+  border-color: #e0e3e8;
+}
+
+.route-item.selected {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+}
+
+.route-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.route-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.route-short {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.route-long {
+  font-size: 0.8rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.2rem;
+}
+
+.route-stops {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .route-list-sidebar {
+    width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gtfs-route-map {
+    flex-direction: column;
+  }
+
+  .route-map-body {
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .route-map-container {
+    min-height: 300px;
+  }
+
+  .route-list-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e0e3e8;
+    max-height: 250px;
+  }
+
+  .route-map-controls {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .route-map-controls {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .route-search {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+
+  .route-count {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .route-list-sidebar {
+    max-height: 200px;
+  }
+
+  .route-item {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .route-color {
+    width: 20px;
+    height: 20px;
+  }
+
+  .route-short {
+    font-size: 0.85rem;
+  }
+
+  .route-long {
+    font-size: 0.75rem;
+  }
+}

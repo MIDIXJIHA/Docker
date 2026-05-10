@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import OperatorSelector from '../components/OperatorSelector';
-import GTFSRouteList from '../components/GTFSRouteList';
-import GTFSSchedule from '../components/GTFSSchedule';
-import WeatherWidget from '../components/WeatherWidget';
+import GTFSRouteMap from '../components/GTFSRouteMap';
 import RealtimeTracker from '../components/RealtimeTracker';
+import WeatherWidget from '../components/WeatherWidget';
 import './Dashboard.css';
 
 function Dashboard() {
-  const [selectedOperator, setSelectedOperator] = useState(null);
+  const [selectedStaticOperator, setSelectedStaticOperator] = useState(null);
+  const [selectedRealtimeOperator, setSelectedRealtimeOperator] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [activeTab, setActiveTab] = useState('routes');
 
@@ -42,92 +42,77 @@ function Dashboard() {
       {/* Main Content */}
       <main className="dashboard-main">
         <div className="dashboard-container">
-          {/* Left Sidebar */}
-          <aside className="sidebar">
-            <div className="sidebar-section">
-              <h2 className="sidebar-title">Transit Operator</h2>
-              <OperatorSelector onSelectOperator={setSelectedOperator} />
-            </div>
+          {/* Tabs */}
+          <div className="content-tabs">
+            <button
+              className={`tab-btn ${activeTab === 'routes' ? 'active' : ''}`}
+              onClick={() => setActiveTab('routes')}
+            >
+              📍 Routes on Map
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'realtime' ? 'active' : ''}`}
+              onClick={() => setActiveTab('realtime')}
+            >
+              🚗 Live Tracking
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'weather' ? 'active' : ''}`}
+              onClick={() => setActiveTab('weather')}
+            >
+              🌦️ Weather
+            </button>
+          </div>
 
-            {/* Routes List */}
-            {selectedOperator && (
-              <div className="sidebar-section routes-section">
-                <h2 className="sidebar-title">Routes</h2>
-                <GTFSRouteList 
-                  operator={selectedOperator} 
-                  onSelectRoute={setSelectedRoute} 
-                />
+          {/* Tab Content */}
+          <div className="tab-content">
+            {/* Routes Tab */}
+            {activeTab === 'routes' && (
+              <div className="tab-panel">
+                <div className="tab-header">
+                  <OperatorSelector type="static" onSelectOperator={setSelectedStaticOperator} />
+                </div>
+                {selectedStaticOperator ? (
+                  <GTFSRouteMap
+                    operator={selectedStaticOperator}
+                    selectedRoute={selectedRoute}
+                    onSelectRoute={setSelectedRoute}
+                  />
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon">📍</div>
+                    <h3>Select a Route Operator</h3>
+                    <p>Choose a transit operator to view routes on the map.</p>
+                  </div>
+                )}
               </div>
             )}
-          </aside>
 
-          {/* Main Content Area */}
-          <section className="main-content">
-            {/* Tabs */}
-            <div className="content-tabs">
-              <button
-                className={`tab-btn ${activeTab === 'routes' ? 'active' : ''}`}
-                onClick={() => setActiveTab('routes')}
-              >
-                📋 Schedule
-              </button>
-              <button
-                className={`tab-btn ${activeTab === 'realtime' ? 'active' : ''}`}
-                onClick={() => setActiveTab('realtime')}
-              >
-                🚗 Realtime
-              </button>
-              <button
-                className={`tab-btn ${activeTab === 'weather' ? 'active' : ''}`}
-                onClick={() => setActiveTab('weather')}
-              >
-                🌦️ Weather
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="tab-content">
-              {/* Schedule Tab */}
-              {activeTab === 'routes' && (
-                <div className="tab-panel">
-                  {selectedRoute && selectedOperator ? (
-                    <GTFSSchedule 
-                      operator={selectedOperator} 
-                      route={selectedRoute} 
-                    />
-                  ) : (
-                    <div className="empty-state">
-                      <div className="empty-icon">📍</div>
-                      <h3>Select a Route</h3>
-                      <p>Choose a transit operator and route to view schedules and stop information.</p>
-                    </div>
-                  )}
+            {/* Realtime Tab */}
+            {activeTab === 'realtime' && (
+              <div className="tab-panel">
+                <div className="tab-header">
+                  <OperatorSelector type="realtime" onSelectOperator={setSelectedRealtimeOperator} />
                 </div>
-              )}
+                {selectedRealtimeOperator ? (
+                  <RealtimeTracker operator={selectedRealtimeOperator} />
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon">🚗</div>
+                    <h3>Select a Realtime Operator</h3>
+                    <p>Choose a transit operator to view live vehicle positions.</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-              {/* Realtime Tab */}
-              {activeTab === 'realtime' && (
-                <div className="tab-panel">
-                  {selectedOperator ? (
-                    <RealtimeTracker operator={selectedOperator} />
-                  ) : (
-                    <div className="empty-state">
-                      <div className="empty-icon">🚗</div>
-                      <h3>Select an Operator</h3>
-                      <p>Choose a transit operator to view live vehicle positions and tracking data.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Weather Tab */}
-              {activeTab === 'weather' && (
-                <div className="tab-panel weather-panel">
-                  <WeatherWidget />
-                </div>
-              )}
-            </div>
-          </section>
+            {/* Weather Tab */}
+            {activeTab === 'weather' && (
+              <div className="tab-panel weather-panel">
+                <WeatherWidget />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer Info */}

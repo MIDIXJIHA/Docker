@@ -1,317 +1,156 @@
-# 🚊 Malaysia Transit Hub - Real-Time Vehicle Tracking
+# 🚊 Malaysia Transit Hub
 
-A production-grade full-stack application for tracking Malaysian public transit in real-time using GTFS data and Mapbox GL.
+A full-stack application for exploring Malaysian public transit routes, tracking live vehicles, and checking weather forecasts — powered by the [Malaysia Open Data Portal](https://developer.data.gov.my).
 
 ## Overview
 
-This application provides comprehensive real-time tracking of Malaysian transit operators with:
-- **🗺️ Interactive Maps**: Real-time vehicle positions on Mapbox GL maps
-- **🚗 Live Tracking**: 30-second updates with vehicle speed, bearing, and route information
-- **📍 Multi-Operator Support**: KTMB (KTM trains), Prasarana (LRT/MRT/Monorail/Buses), BAS.MY (Stage buses)
-- **📊 GTFS Integration**: Complete route schedules, stops, and timetable data
-- **🌦️ Weather Integration**: Real-time forecasts and weather alerts from MET Malaysia
-- **💼 Professional UI**: Production-grade dashboard with responsive design
-- **🐳 Docker Ready**: Complete containerized setup with Nginx reverse proxy
+```
+┌─────────────────────────────────────────────┐
+│           Malaysia Transit Hub              │
+├────────────────┬────────────────┬───────────┤
+│ 📍 Routes Map  │ 🚗 Live Track  │ 🌦️ Weather │
+│ GTFS static    │ GTFS Realtime  │ Forecasts  │
+│ route polylines│ 30s auto-refresh│ Location   │
+│ stop markers   │ vehicle markers │ selector   │
+│ schedule panel │ sidebar list    │            │
+└────────────────┴────────────────┴───────────┘
+```
 
 ## Project Structure
 
 ```
-app-rapidkl/
-├── backend/           # Node.js Express API server
-├── frontend/          # React dashboard application
-├── docker/            # Docker configuration
-│   ├── nginx/         # Nginx reverse proxy config
-│   └── node/          # Node.js Dockerfile
-├── docker-compose.yml # Container orchestration
-└── README.md
+containers/app-rapidkl/
+├── backend/                          # Node.js Express API server
+│   └── src/
+│       └── server.js                 # All API routes (inline)
+├── frontend/                         # React single-page app
+│   └── src/
+│       ├── components/
+│       │   ├── GTFSRouteMap.js/.css  # Route → stops → schedule
+│       │   ├── RealtimeTracker.js/.css # Live vehicle tracking
+│       │   ├── WeatherWidget.js/.css # Forecast + location picker
+│       │   └── OperatorSelector.js/.css # Operator dropdown
+│       ├── pages/
+│       │   └── Dashboard.js/.css     # Tabbed layout
+│       ├── services/
+│       │   └── api.js                # Axios API client
+│       └── App.js                    # Root component
+├── docker/                           # Docker configs
+│   ├── nginx/                        # Reverse proxy
+│   └── node/                         # Node.js Dockerfile
+├── docker-compose.yml
+└── .env / .env.example
 ```
 
-## Prerequisites
+## Quick Start
 
-- Node.js 18+
-- npm or yarn
-- Docker and Docker Compose
-- **Mapbox Account** (free): https://account.mapbox.com/auth/signup/
-- Malaysia Open Data Portal Account (optional): https://developer.data.gov.my
-
-## Quick Start - Docker (Recommended)
+### Local development
 
 ```bash
-# 1. Clone and navigate
-cd /path/to/containers/app-rapidkl
+# Terminal 1 — Backend
+cd containers/app-rapidkl/backend
+npm install
+npm start                            # http://localhost:5001
 
-# 2. Set up environment with Mapbox token
+# Terminal 2 — Frontend
+cd containers/app-rapidkl/frontend
+npm install
+npm start                            # http://localhost:3000
+```
+
+### Docker
+
+```bash
+cd containers/app-rapidkl
 cp .env.example .env
-# Edit .env and add your Mapbox token:
-# REACT_APP_MAPBOX_TOKEN=pk.eyJ1...your_token...
-
-# 3. Build and start all services
-docker-compose up --build
-
-# 4. Access the application
-# Browser: http://localhost
-# or
-# Frontend directly: http://localhost:3000
-# Backend API: http://localhost:5001/api
+docker-compose up --build            # http://localhost
 ```
 
-## Getting a Mapbox Token
+## Features
 
-1. Visit https://account.mapbox.com/auth/signup/
-2. Create a free account (allows up to 50,000 map loads/month)
-3. Go to "Tokens" in your account dashboard
-4. Create a new token with scope: `Maps:Read`, `CORS:Enabled`
-5. Copy the token and paste it in your `.env` file as `REACT_APP_MAPBOX_TOKEN`
+### 📍 Routes on Map (GTFS Static)
 
-## Environment Setup
+- Select a transit operator (KTMB, Prasarana LRT/MRT/Bus, BAS.MY)
+- All routes are drawn as coloured polylines on a Leaflet/OpenStreetMap map
+- Click a route in the sidebar to highlight it and zoom to its bounds
+- **Stop markers** appear for the selected route — click any stop to:
+  - See its name, code, and coordinates in a popup
+  - **View departure times** in a schedule panel at the bottom of the sidebar
+- Search routes by name or short code
+- Sidebar route list scrolls when too long
 
-Create/update `.env` in the project root:
+### 🚗 Live Tracking (GTFS Realtime)
 
-```env
-# Backend
-NODE_ENV=development
-PORT=5001
-CACHE_ENABLED=true
-CACHE_TTL=300
+- Select a realtime-capable operator
+- **Vehicle markers** show live positions with bearing arrows, updated every 30 seconds
+- Toggle auto-refresh and route overlays
+- **Click a vehicle** in the sidebar or on the map to:
+  - Fly the map to that vehicle's location (zoom level 15)
+  - See vehicle ID, route, trip, speed, and bearing
+- Route polylines can be shown/hidden
 
-# Frontend
-REACT_APP_API_URL=http://localhost:5001/api
+### 🌦️ Weather (Malaysia MET data)
 
-# Mapbox - REQUIRED for real-time map tracking
-REACT_APP_MAPBOX_TOKEN=pk.eyJ1IjoieW91ciIsImEiOiJjazAwMDAwMDAwIn0.XXXXXXX
-
-# Malaysia Open Data Portal (Optional)
-RAPIDKL_API_KEY=your_api_key_here
-RAPIDKL_API_BASE_URL=https://developer.data.gov.my
-```
-
-## Core Features
-
-### 🗺️ Real-Time Vehicle Tracking Map
-- Interactive Mapbox GL map showing live vehicle positions
-- Color-coded by operator (Red: KTMB, Blue: Prasarana, Orange: BAS.MY)
-- Vehicle markers with bearing/direction indicator
-- Popup information on hover with speed, route, trip ID
-- Auto-fit to show all active vehicles
-- Click vehicle in sidebar to fly map to location
-
-### 📋 Route & Schedule Browsing
-- Search and filter routes by operator
-- View all stops on a route with geographic coordinates
-- Display complete timetables (stop times) for each route
-- One-click navigation to schedule for each stop
-
-### 🌦️ Weather Integration
-- 7-day weather forecast for major Malaysian cities
-- Weather alerts and warnings
-- Earthquake warning data
-- Updates every 30 minutes
-
-### 🚗 Auto-Refresh System
-- Vehicles update every 30 seconds
-- Toggleable auto-refresh with manual refresh option
-- Efficient client-side caching
-
-### 📱 Responsive Design
-- Desktop: Full sidebar with vehicle list
-- Tablet: Adjusted layout with collapsible panels
-- Mobile: Bottom panel for vehicle list, full-screen map
-
-## Supported Transit Operators
-
-### KTMB (KTM Trains)
-- 🚆 All KTM train routes nationwide
-- GTFS Static: Daily updates at 00:01 UTC
-- GTFS Realtime: Vehicle positions every 30s
-
-### Prasarana (LRT/MRT/Monorail)
-- 🚊 rapid-kl (KL LRT)
-- rapid-rail-kl (KL Monorail)
-- rapid-bus-kl (KL City Buses)
-- rapid-bus-mrtfeeder (MRT Feeder Buses)
-- rapid-bus-kuantan (Kuantan Buses)
-- rapid-bus-penang (Penang Buses)
-- Updates as needed via Open Data Portal
-
-### BAS.MY (State Buses)
-- 🚌 Multiple regional operators:
-  - Kangar (Perlis)
-  - Alor Setar (Kedah)
-  - Kota Bharu (Kelantan)
-  - Kuala Terengganu (Terengganu)
-  - Ipoh (Perak)
-  - Seremban A & B (Negeri Sembilan)
-  - Melaka, Johor, Kuching
+- Fetches 50 forecast entries from `data.gov.my` (respects the 4 req/min rate limit)
+- **Location dropdown** — pick from all available Malaysian locations/districts
+- Display: weather icon, max temperature, morning/afternoon/night conditions, date
+- Auto-retries on 429 rate-limit errors with 2-second backoff
 
 ## API Endpoints
 
-### Health & Status
-- `GET /api/health` - Server health check
+| Endpoint | Description |
+|---|---|
+| `GET /api/health` | Server health check |
+| `GET /api/operators` | List static GTFS operators |
+| `GET /api/gtfs/:operator/routes` | Routes for operator |
+| `GET /api/gtfs/:operator/stops` | All stops for operator |
+| `GET /api/gtfs/:operator/routes/:routeId/stops` | Stops on a route |
+| `GET /api/gtfs/:operator/routes/:routeId/schedule?stopId=X` | Schedule for a stop |
+| `GET /api/realtime/operators` | Realtime-capable operators |
+| `GET /api/realtime/vehicle-positions/:operator` | Live vehicle positions |
+| `GET /api/weather/forecast` | 7-day forecast |
+| `GET /api/weather/warnings` | Weather warnings |
+| `GET /api/weather/earthquake-warnings` | Earthquake data |
 
-### Operators
-- `GET /api/operators` - List all operators with metadata
+## Supported Operators
 
-### GTFS Static Data (Routes & Schedules)
-- `GET /api/gtfs/:operator/routes` - All routes for operator
-- `GET /api/gtfs/:operator/stops` - All stops for operator
-- `GET /api/gtfs/:operator/routes/:routeId/stops` - Stops on specific route
-- `GET /api/gtfs/:operator/routes/:routeId/schedule?stopId=X` - Timetable for stop
+| Operator | ID | GTFS Static | GTFS Realtime |
+|---|---|---|---|
+| KTMB (Trains) | `ktmb` | ✓ | ✓ |
+| Prasarana KL (LRT/MRT) | `prasarana-kl` | ✓ | ✓ |
+| Prasarana Bus KL | `prasarana-bus-kl` | ✓ | — |
+| BAS.MY Kangar | `mybas-kangar` | ✓ | — |
+| BAS.MY Alor Setar | `mybas-alor-setar` | ✓ | — |
+| BAS.MY Kota Bharu | `mybas-kota-bharu` | ✓ | — |
+| BAS.MY Terengganu | `mybas-terengganu` | ✓ | — |
+| BAS.MY Ipoh | `mybas-ipoh` | ✓ | — |
+| BAS.MY Seremban | `mybas-seremban` | ✓ | — |
+| BAS.MY Melaka | `mybas-melaka` | ✓ | — |
+| BAS.MY Johor | `mybas-johor` | ✓ | — |
+| BAS.MY Kuching | `mybas-kuching` | ✓ | — |
 
-### GTFS Realtime Data (Vehicle Positions)
-- `GET /api/realtime/operators` - List realtime-capable operators
-- `GET /api/realtime/vehicle-positions/:operator` - Current vehicle positions (protobuf decoded)
+## Rate Limits
 
-### Weather Data
-- `GET /api/weather/forecast` - 7-day weather forecast
-- `GET /api/weather/warnings` - Active weather warnings
-- `GET /api/weather/earthquake-warnings` - Earthquake data
+The Malaysia Open Data Portal enforces **4 requests per minute** per API type (Weather, GTFS Static, GTFS Realtime). The application handles this with:
+- **24-hour client-side cache** for GTFS static data
+- **429 retry with backoff** for Weather API
+- 30-second polling interval for realtime vehicle positions (one request fits comfortably within the limit)
 
-## Dashboard Tabs
-
-### 📋 Schedule Tab
-- Browse routes and stops
-- View complete timetables
-- Search routes by name
-- Click on stops to see timetable details
-- Responsive grid layout for stop times
-
-### 🚗 Realtime Tab
-- Interactive Mapbox map with live vehicles
-- Vehicle sidebar showing active vehicles
-- Real-time updates every 30 seconds
-- Click vehicle to see detailed information:
-  - Vehicle ID, Route ID, Speed
-  - Bearing (direction), GPS coordinates
-  - Trip information
-- Auto-refresh toggle
-- Show/hide routes toggle
-
-### 🌦️ Weather Tab
-- 7-day forecast for 5 major Malaysian cities
-- Current conditions with temperature
-- Precipitation and wind data
-- Active warnings and alerts
-- Color-coded weather severity
-
-## Advanced Features
-
-### Map Interactions
-- Zoom in/out to see vehicle details
-- Pan to follow vehicles
-- Popup information on vehicle markers
-- Sidebar vehicle list with quick navigation
-- Bearing indicator on vehicle markers
-
-### Data Caching
-- GTFS data cached for 24 hours to reduce API load
-- Client-side caching of vehicle position data
-- Configurable cache TTL via environment
-
-### Error Handling
-- Graceful fallback when data unavailable
-- Clear error messages to user
-- Automatic retry for transient failures
-- Rate limit awareness for external APIs
-
-## Local Development
-
-### Backend Development
-```bash
-cd backend
-npm install
-npm start
-# Runs on http://localhost:5001
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm install
-npm start
-# Runs on http://localhost:3000 with hot reload
-```
-
-### Test API Endpoints
-```bash
-# Health check
-curl http://localhost:5001/api/health
-
-# List operators
-curl http://localhost:5001/api/operators
-
-# Get routes for KTMB
-curl http://localhost:5001/api/gtfs/ktmb/routes
-
-# Get live vehicles for KTMB
-curl http://localhost:5001/api/realtime/vehicle-positions/ktmb
-```
-docker-compose build --no-cache
-```
-
-### Environment Variables for Production
-
-Set these in your production environment:
+## Environment Variables
 
 ```env
-NODE_ENV=production
-RAPIDKL_API_KEY=your_production_key
-CACHE_ENABLED=true
-CACHE_TTL=600
+NODE_ENV=development
+PORT=5001
+REACT_APP_API_URL=http://localhost:5001/api
 ```
 
-## Troubleshooting
+## Data Sources
 
-### API Connection Failed
-- Check if `RAPIDKL_API_KEY` is set correctly
-- Verify the API endpoint is accessible
-- Check network connectivity
-
-### Frontend Can't Connect to Backend
-- Ensure backend is running on port 5000
-- Check CORS configuration in backend/src/server.js
-- Verify REACT_APP_API_URL environment variable
-
-### Docker Issues
-- Clear volumes: `docker-compose down -v`
-- Rebuild: `docker-compose build --no-cache`
-- Check logs: `docker-compose logs -f`
-
-## Architecture Diagram
-
-```
-┌─────────────┐
-│   Client    │
-│  (Browser)  │
-└──────┬──────┘
-       │
-       │ HTTP/HTTPS
-       ▼
-┌─────────────────┐
-│ Nginx Reverse   │
-│ Proxy (Port 80) │
-└─────┬───────────┘
-      │
-      ├──────┬──────────┐
-      │      │          │
-      ▼      ▼          ▼
-   React   Node.js   Static
-   App     Backend   Files
- (3000)    (5000)
-      │      │
-      │      └─────────┐
-      │                │
-      ▼                ▼
-  RapidKL API    rapidkl-
-  (data.gov.my)  component
-```
+- **GTFS Static**: [data.gov.my](https://api.data.gov.my/gtfs-static)
+- **GTFS Realtime**: [data.gov.my](https://api.data.gov.my/gtfs-realtime)
+- **Weather**: [data.gov.my](https://api.data.gov.my/weather)
+- **Map tiles**: OpenStreetMap (via Leaflet)
 
 ## License
 
 MIT
-
-## Support
-
-For issues or questions, refer to:
-- RapidKL API Docs: https://developer.data.gov.my
-- React Documentation: https://react.dev
-- Express Documentation: https://expressjs.com

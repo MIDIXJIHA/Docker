@@ -78,9 +78,8 @@
 .dashboard-container {
   max-width: 1400px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 2rem;
+  display: flex;
+  flex-direction: column;
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -88,44 +87,23 @@
   min-height: 600px;
 }
 
-/* Sidebar */
-.sidebar {
-  background: #f8f9fa;
-  border-right: 1px solid #e0e3e8;
-  overflow-y: auto;
-  max-height: 800px;
-}
-
-.sidebar-section {
+/* Tab Header */
+.tab-header {
   padding: 1.5rem;
+  background: #f8f9fa;
   border-bottom: 1px solid #e0e3e8;
-}
-
-.sidebar-section:last-child {
-  border-bottom: none;
-}
-
-.sidebar-title {
-  margin: 0 0 1rem 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #667eea;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Main Content */
-.main-content {
   display: flex;
-  flex-direction: column;
-  padding: 2rem;
+  align-items: center;
+  gap: 1rem;
 }
 
 .content-tabs {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: white;
   border-bottom: 2px solid #e0e3e8;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -264,26 +242,11 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .dashboard-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
-  .sidebar {
-    max-height: auto;
-    border-right: none;
-    border-bottom: 1px solid #e0e3e8;
-    display: flex;
+  .content-tabs {
     flex-wrap: wrap;
-  }
-
-  .sidebar-section {
-    flex: 1;
-    min-width: 250px;
-    border-right: 1px solid #e0e3e8;
-    border-bottom: none;
-  }
-
-  .sidebar-section:last-child {
-    border-right: none;
   }
 
   .header-content {
@@ -307,11 +270,11 @@
   }
 
   .dashboard-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     border-radius: 0;
   }
 
-  .main-content {
+  .tab-header {
     padding: 1rem;
   }
 
@@ -325,7 +288,7 @@
 
   .content-tabs {
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    padding: 1rem;
   }
 
   .tab-btn {
@@ -337,15 +300,6 @@
     grid-template-columns: 1fr;
     gap: 1rem;
     margin: 1rem auto 0;
-  }
-
-  .sidebar {
-    display: block;
-  }
-
-  .sidebar-section {
-    border-right: none;
-    border-bottom: 1px solid #e0e3e8;
   }
 
   .empty-state {
@@ -378,6 +332,7 @@
 
   .content-tabs {
     gap: 0;
+    padding: 0.5rem;
   }
 
   .tab-btn {
