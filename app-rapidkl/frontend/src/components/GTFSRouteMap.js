@@ -91,10 +91,15 @@ function GTFSRouteMap({ operator, selectedRoute, onSelectRoute }) {
 
             validStops.sort((a, b) => (a.stop_sequence || 0) - (b.stop_sequence || 0));
 
-            const coordinates = validStops.map(stop => [
-              Number(stop.stop_lat),
-              Number(stop.stop_lon),
-            ]);
+            // Try to fetch the exact shape path from shapes.txt
+            let shapeCoordinates = await RapidKLAPI.getRouteShape(operator, route.id);
+            if (!Array.isArray(shapeCoordinates) || shapeCoordinates.length < 2) {
+              // Fallback to straight lines between stops
+              shapeCoordinates = validStops.map(stop => [
+                Number(stop.stop_lat),
+                Number(stop.stop_lon),
+              ]);
+            }
 
             polylines.push({
               id: route.id,
@@ -105,7 +110,7 @@ function GTFSRouteMap({ operator, selectedRoute, onSelectRoute }) {
               color: route.color
                 ? `#${route.color.replace('#', '')}`
                 : getRouteColor(route.id),
-              coordinates,
+              coordinates: shapeCoordinates,
               stops: validStops,
             });
 

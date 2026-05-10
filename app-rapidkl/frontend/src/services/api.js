@@ -36,6 +36,14 @@ class RapidKLAPI {
   }
 
   /**
+   * Get shape polyline points for a route (from shapes.txt)
+   */
+  static async getRouteShape(operator, routeId) {
+    const response = await axios.get(`${API_URL}/gtfs/${operator}/routes/${routeId}/shapes`);
+    return response.data.data;
+  }
+
+  /**
    * Get schedule for a stop
    */
   static async getSchedule(operator, routeId, stopId) {

@@ -168,6 +168,18 @@ app.get('/api/gtfs/:operator/routes/:routeId/stops', async (req, res) => {
   }
 });
 
+app.get('/api/gtfs/:operator/routes/:routeId/shapes', async (req, res) => {
+  try {
+    if (!gtfsService) {
+      return res.status(503).json({ error: 'Service not initialized' });
+    }
+    const shape = await gtfsService.getRouteShape(req.params.operator, req.params.routeId);
+    res.json({ success: true, data: shape });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/gtfs/:operator/routes/:routeId/schedule', async (req, res) => {
   try {
     if (!gtfsService) {
