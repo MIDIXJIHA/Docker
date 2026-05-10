@@ -44,26 +44,26 @@ containers/app-rapidkl/
 
 ## Quick Start
 
-### Local development
-
-```bash
-# Terminal 1 — Backend
-cd containers/app-rapidkl/backend
-npm install
-npm start                            # http://localhost:5001
-
-# Terminal 2 — Frontend
-cd containers/app-rapidkl/frontend
-npm install
-npm start                            # http://localhost:3000
-```
-
-### Docker
+### Docker (recommended)
 
 ```bash
 cd containers/app-rapidkl
 cp .env.example .env
 docker-compose up --build            # http://localhost
+```
+
+Docker automatically runs `npm install` and starts both the backend (port 5001) and frontend (port 3000) behind an Nginx reverse proxy on port 80.
+
+### Local development (manual)
+
+```bash
+# Terminal 1 — Backend
+cd containers/app-rapidkl/backend
+npm install && npm start             # http://localhost:5001
+
+# Terminal 2 — Frontend
+cd containers/app-rapidkl/frontend
+npm install && npm start             # http://localhost:3000
 ```
 
 ## Features
