@@ -118,7 +118,6 @@ class ChessService {
       const stockfishMove = await this.stockfish.getBestMove(chess.fen(), {
         skillLevel,
         moveTime,
-        depth: 12,
       });
 
       if (!stockfishMove) {

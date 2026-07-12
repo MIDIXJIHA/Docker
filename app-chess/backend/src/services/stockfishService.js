@@ -22,8 +22,7 @@ class StockfishService {
         this.sendCommand('uci');
         await this.waitFor('uciok');
 
-        // Set default options
-        this.sendCommand('setoption name UCI_AnalyseMode value true');
+        // Set default options for gameplay (not analysis mode)
         this.sendCommand('setoption name MultiPV value 1');
 
         console.log('✓ Stockfish engine initialized');
@@ -65,7 +64,6 @@ class StockfishService {
     const {
       skillLevel = 10,       // 0 (weak) to 20 (strong)
       moveTime = 500,        // ms to think
-      depth = 12,            // search depth limit
     } = options;
 
     if (!this.ready) {
@@ -87,8 +85,9 @@ class StockfishService {
       // Set position
       this.sendCommand(`position fen ${fen}`);
 
-      // Start calculation
-      this.sendCommand(`go movetime ${moveTime} depth ${depth}`);
+      // Start calculation - use ONLY movetime so Stockfish thinks for the full duration
+      // Higher skill levels with longer moveTime will search much deeper than depth 12
+      this.sendCommand(`go movetime ${moveTime}`);
 
       this.engine.onmessage = (line) => {
         // Parse bestmove from output

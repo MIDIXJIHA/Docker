@@ -22,7 +22,7 @@ const loadScripts = () => {
   });
 };
 
-function ChessBoard({ fen, onMove, playerColor, isGameOver }) {
+function ChessBoard({ fen, onMove, playerColor, isGameOver, lastMove, orientation }) {
   const boardRef = useRef(null);
   const boardInstanceRef = useRef(null);
   const initializedRef = useRef(false);
@@ -31,11 +31,15 @@ function ChessBoard({ fen, onMove, playerColor, isGameOver }) {
   const onMoveRef = useRef(onMove);
   const playerColorRef = useRef(playerColor);
   const isGameOverRef = useRef(isGameOver);
+  const lastMoveRef = useRef(lastMove);
+  const orientationRef = useRef(orientation);
 
   // Keep refs in sync with props
   useEffect(() => { onMoveRef.current = onMove; }, [onMove]);
   useEffect(() => { playerColorRef.current = playerColor; }, [playerColor]);
   useEffect(() => { isGameOverRef.current = isGameOver; }, [isGameOver]);
+  useEffect(() => { lastMoveRef.current = lastMove; }, [lastMove]);
+  useEffect(() => { orientationRef.current = orientation; }, [orientation]);
 
   // Initialize board once
   useEffect(() => {
@@ -49,14 +53,24 @@ function ChessBoard({ fen, onMove, playerColor, isGameOver }) {
 
       const Chessboard = window.Chessboard;
 
+      // Determine initial orientation: 'w' = white at bottom, 'b' = black at bottom
+      const initOrientation = orientationRef.current === 'b' ? 'black' : 'white';
+
       const config = {
         draggable: true,
         position: fen || 'start',
+        orientation: initOrientation,
         pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
         onDragStart: (source, piece) => {
           if (isGameOverRef.current) return false;
-          if (playerColorRef.current === 'white' && piece.search(/^b/) !== -1) return false;
-          if (playerColorRef.current === 'black' && piece.search(/^w/) !== -1) return false;
+          // In local mode, allow dragging pieces of the current turn's color
+          // In online mode, only allow dragging your own color
+          const color = playerColorRef.current;
+          if (color === 'w' && piece.search(/^b/) !== -1) return false;
+          if (color === 'b' && piece.search(/^w/) !== -1) return false;
+          // If color is 'white' or 'black' (online mode), restrict to that color
+          if (color === 'white' && piece.search(/^b/) !== -1) return false;
+          if (color === 'black' && piece.search(/^w/) !== -1) return false;
           return true;
         },
         onDrop: (source, target) => {
@@ -85,6 +99,14 @@ function ChessBoard({ fen, onMove, playerColor, isGameOver }) {
       boardInstanceRef.current.position(fen, false);
     }
   }, [fen]);
+
+  // Flip board orientation when turn changes (local mode)
+  useEffect(() => {
+    if (boardInstanceRef.current && orientation) {
+      const orient = orientation === 'b' ? 'black' : 'white';
+      boardInstanceRef.current.orientation(orient);
+    }
+  }, [orientation]);
 
   // Cleanup on unmount
   useEffect(() => {

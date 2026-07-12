@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { authAPI, botsAPI } from './services/api';
 import ChessBoard from './components/ChessBoard';
+import LocalChess from './components/LocalChess';
 
 const PIECE_ICONS = {
   w: { K: 'fa-chess-king', Q: 'fa-chess-queen', R: 'fa-chess-rook', B: 'fa-chess-bishop', N: 'fa-chess-knight', P: 'fa-chess-pawn' },
@@ -386,17 +387,25 @@ function App() {
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </div>
 
-      <h2>Play Chess</h2>
+      <h2>Choose Your Game</h2>
       <div className="lobby-options">
         <div className="lobby-card" onClick={startOnlineGame}>
-          <span className="icon"><i className="fas fa-chess-rook"></i></span>
+          <span className="icon"><i className="fas fa-globe"></i></span>
           <h3>Play Online</h3>
           <p>Match with a random opponent in real-time</p>
+          <span className="lobby-badge">Multiplayer</span>
         </div>
         <div className="lobby-card" onClick={() => setScreen('bots')}>
           <span className="icon"><i className="fas fa-robot"></i></span>
           <h3>Play vs Bot</h3>
           <p>Practice against AI opponents at various levels</p>
+          <span className="lobby-badge">AI</span>
+        </div>
+        <div className="lobby-card" onClick={() => setScreen('local')}>
+          <span className="icon"><i className="fas fa-users"></i></span>
+          <h3>Local 1v1</h3>
+          <p>Play with a friend on the same device</p>
+          <span className="lobby-badge">Offline</span>
         </div>
       </div>
     </div>
@@ -420,7 +429,9 @@ function App() {
         {bots.map((bot) => (
           <div key={bot.id} className="bot-card" onClick={() => startBotGame(bot.id)}>
             <div className="bot-info">
-              <div className="bot-name">{bot.name}</div>
+              <div className="bot-name">
+                <i className="fas fa-robot"></i> {bot.name}
+              </div>
               <div className="bot-desc">{bot.description}</div>
             </div>
             <div className="bot-rating"><i className="fas fa-chess-pawn"></i> {bot.rating}</div>
@@ -545,8 +556,8 @@ function App() {
               </div>
               <div className={`status-text ${statusClass}`}>{statusText}</div>
               {moveNotation && gameState.status === 'active' && (
-                <div style={{ textAlign: 'center', marginTop: '8px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                  Last move: <strong style={{ color: 'var(--text-primary)' }}>{moveNotation}</strong>
+                <div className="last-move">
+                  Last move: <strong>{moveNotation}</strong>
                 </div>
               )}
             </div>
@@ -623,14 +634,15 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        <h1><i className="fas fa-chess-rook"></i> Chess</h1>
+        <h1><i className="fas fa-chess-rook"></i> Chess Arena</h1>
         <p className="subtitle">Play chess with friends, bots, or random opponents</p>
       </div>
 
-      {!user && screen !== 'game' && renderAuth()}
+      {!user && screen !== 'game' && screen !== 'local' && renderAuth()}
       {user && screen === 'lobby' && renderLobby()}
       {user && screen === 'bots' && renderBotSelection()}
       {screen === 'game' && renderGame()}
+      {screen === 'local' && <LocalChess onBack={() => setScreen('lobby')} />}
     </div>
   );
 }
