@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { authAPI, botsAPI } from './services/api';
+import sessionManager from './services/session';
 import ChessBoard from './components/ChessBoard';
 import LocalChess from './components/LocalChess';
 
@@ -153,15 +154,14 @@ function App() {
     return socket;
   }, [handleWebSocketMessage]);
 
-  // Auth handlers
+  // Auth handlers using session manager
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     try {
       const res = await authAPI.login(loginForm);
       const { user: userData, token } = res.data.data;
-      localStorage.setItem('chess_token', token);
-      localStorage.setItem('chess_user', JSON.stringify(userData));
+      sessionManager.create(userData, token);
       setUser(userData);
       connectWebSocket(token);
       setScreen('lobby');
@@ -177,8 +177,7 @@ function App() {
     try {
       const res = await authAPI.register(registerForm);
       const { user: userData, token } = res.data.data;
-      localStorage.setItem('chess_token', token);
-      localStorage.setItem('chess_user', JSON.stringify(userData));
+      sessionManager.create(userData, token);
       setUser(userData);
       connectWebSocket(token);
       setScreen('lobby');
@@ -193,8 +192,7 @@ function App() {
     try {
       const res = await authAPI.guest();
       const { user: userData, token } = res.data.data;
-      localStorage.setItem('chess_token', token);
-      localStorage.setItem('chess_user', JSON.stringify(userData));
+      sessionManager.create(userData, token);
       setUser(userData);
       connectWebSocket(token);
       setScreen('lobby');
@@ -205,8 +203,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('chess_token');
-    localStorage.removeItem('chess_user');
+    sessionManager.logout();
     setUser(null);
     setGameState(null);
     if (wsRef.current) {
@@ -226,17 +223,38 @@ function App() {
     }
   };
 
-  // Check for existing session
+  // Check for existing session on mount
   useEffect(() => {
-    const token = localStorage.getItem('chess_token');
-    const savedUser = localStorage.getItem('chess_user');
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      connectWebSocket(token);
-      setScreen('lobby');
-      loadBots();
-    }
+    const restoreSession = async () => {
+      const session = await sessionManager.init();
+      if (session) {
+        setUser(session.user);
+        connectWebSocket(session.token);
+        setScreen('lobby');
+        loadBots();
+      }
+    };
+    restoreSession();
   }, [connectWebSocket]);
+
+  // Listen for session expired events from API interceptor
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      sessionManager.logout();
+      setUser(null);
+      setGameState(null);
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      setWs(null);
+      setScreen('login');
+      setError('Session expired. Please log in again.');
+    };
+
+    window.addEventListener('session:expired', handleSessionExpired);
+    return () => window.removeEventListener('session:expired', handleSessionExpired);
+  }, []);
 
   const startOnlineGame = () => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

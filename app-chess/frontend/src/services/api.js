@@ -18,6 +18,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor to handle 401 errors globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token invalid/expired — clear session
+      localStorage.removeItem('chess_token');
+      localStorage.removeItem('chess_user');
+      localStorage.removeItem('chess_session');
+      
+      // Only redirect if not already on login page
+      if (window.location.hash !== '#/login') {
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
